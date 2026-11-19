@@ -1,7 +1,13 @@
+import json
+import os
+
 from flask import Flask, jsonify, request
 
 from ..services.library_service import LibraryService
 from ..services.player_service import PlayerService
+
+# musicas de exemplo carregadas quando o servidor sobe
+SEED_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "seed.json")
 
 
 def _songs_to_dicts(songs):
@@ -42,12 +48,27 @@ def _player_state(player):
     }
 
 
-def create_app():
-    app = Flask(__name__)
+def _load_seed(library):
+    # le as musicas de exemplo do arquivo e coloca na biblioteca
+    with open(SEED_PATH, encoding="utf-8") as file:
+        songs = json.load(file)
+
+    for song in songs:
+        library.add_song(song["title"], song["artist"], song["duration"])
+
+
+def create_app(load_seed=True):
+    # static_folder e relativo a esta pasta (backend/api);
+    # os arquivos do front ficam em /static/style.css, /static/app.js
+    app = Flask(__name__, static_folder="../../frontend", static_url_path="/static")
 
     # uma instancia de cada servico por app: o estado fica em memoria
     library = LibraryService()
     player = PlayerService(library)
+
+    # os testes usam load_seed=False para comecar com a biblioteca vazia
+    if load_seed:
+        _load_seed(library)
 
     # ---------- tratamento de erros ----------
 
@@ -63,6 +84,12 @@ def create_app():
     @app.errorhandler(IndexError)
     def handle_index_error(e):
         return jsonify({"error": str(e)}), 400
+
+    # ---------- front-end ----------
+
+    @app.route("/")
+    def index():
+        return app.send_static_file("index.html")
 
     # ---------- biblioteca ----------
 

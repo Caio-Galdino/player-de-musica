@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player de Música</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="logo">♪</div>
+        <h1>Player de Música</h1>
+    </header>
+
+    <!-- mensagens de erro vindas da API (aparece no canto da tela) -->
+    <p id="error" class="toast" role="alert" hidden></p>
+
+    <main class="layout">
+        <!-- ===== coluna da biblioteca ===== -->
+        <section class="card library">
+            <div class="card-header">
+                <h2>Biblioteca</h2>
+                <span class="badge" id="library-count">0</span>
+            </div>
+
+            <form id="add-form" class="add-form">
+                <input id="add-title" placeholder="Título" required>
+                <input id="add-artist" placeholder="Artista" required>
+                <input id="add-duration" type="number" min="1" placeholder="Duração (s)" required>
+                <button type="submit" class="btn btn-primary">Adicionar</button>
+            </form>
+
+            <div class="toolbar">
+                <form id="search-form" class="search">
+                    <input id="search-title" type="search" placeholder="Buscar por título">
+                    <button type="submit" class="btn">Buscar</button>
+                    <button type="button" id="search-clear" class="btn btn-ghost">Limpar</button>
+                </form>
+
+                <label class="order">
+                    Ordenar por
+                    <select id="order">
+                        <option value="title">Título</option>
+                        <option value="duration">Duração</option>
+                    </select>
+                </label>
+            </div>
+
+            <ul id="library" class="song-list"></ul>
+        </section>
+
+        <!-- ===== coluna do player ===== -->
+        <div class="side">
+            <section class="card now-playing">
+                <div class="cover" id="now-cover">♪</div>
+                <div class="now-info">
+                    <span class="label">Tocando agora</span>
+                    <strong id="now-title" class="now-title">Nada tocando</strong>
+                    <span id="now-artist" class="now-artist">Adicione músicas à playlist e aperte play</span>
+                    <span id="now-duration" class="now-duration"></span>
+                </div>
+
+                <div class="controls">
+                    <button id="btn-previous" class="round" title="Anterior" aria-label="Anterior">
+                        <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
+                    </button>
+                    <button id="btn-play" class="round round-big" title="Play" aria-label="Play">
+                        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                    <button id="btn-next" class="round" title="Próxima" aria-label="Próxima">
+                        <svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7-11 7z"/></svg>
+                    </button>
+                </div>
+
+                <label class="switch">
+                    <input type="checkbox" id="repeat">
+                    <span class="slider"></span>
+                    Repetir playlist
+                </label>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>Playlist</h2>
+                    <span class="badge" id="playlist-count">0</span>
+                </div>
+                <ul id="playlist" class="song-list"></ul>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>Tocar a seguir</h2>
+                    <span class="badge" id="queue-count">0</span>
+                </div>
+                <ul id="queue" class="song-list"></ul>
+            </section>
+
+            <section class="card">
+                <div class="card-header">
+                    <h2>Histórico</h2>
+                    <span class="badge" id="history-count">0</span>
+                </div>
+                <ul id="history" class="song-list"></ul>
+            </section>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

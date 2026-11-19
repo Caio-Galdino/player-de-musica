@@ -1,17 +1,45 @@
+import json
 import unittest
-from backend.api.app import create_app
+from backend.api.app import SEED_PATH, create_app
 
 
 class ApiTestCase(unittest.TestCase):
     def setUp(self):
         # app novo a cada teste: biblioteca e player comecam vazios
-        self.client = create_app().test_client()
+        self.client = create_app(load_seed=False).test_client()
 
     def add(self, title, artist, duration):
         return self.client.post(
             "/api/songs",
             json={"title": title, "artist": artist, "duration": duration},
         )
+
+
+class TestFrontendRoutes(ApiTestCase):
+    def test_root_serves_index_html(self):
+        response = self.client.get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/html", response.content_type)
+        self.assertIn(b"Player de M", response.data)
+        response.close()
+
+    def test_serves_static_files(self):
+        for path, content_type in (
+            ("/static/app.js", "javascript"),
+            ("/static/style.css", "text/css"),
+        ):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(content_type, response.content_type)
+                response.close()
+
+    def test_api_routes_still_work_with_static_at_root(self):
+        response = self.client.get("/api/songs")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), [])
 
 
 class TestLibraryRoutes(ApiTestCase):
@@ -451,6 +479,18 @@ class TestRemoveSongInUse(PlayerApiTestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+
+
+class TestSeed(unittest.TestCase):
+    def test_default_app_loads_all_seed_songs(self):
+        with open(SEED_PATH, encoding="utf-8") as file:
+            seed = json.load(file)
+
+        client = create_app().test_client()
+        songs = client.get("/api/songs").get_json()
+
+        # funciona com o seed vazio ou cheio: carrega tudo que esta no arquivo
+        self.assertEqual(len(songs), len(seed))
 
 
 if __name__ == "__main__":
