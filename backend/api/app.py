@@ -29,6 +29,19 @@ def _require_text(data, field):
     return value
 
 
+def _player_state(player):
+    # estado completo do player: o front redesenha a tela com uma chamada so
+    now_playing = player.now_playing()
+
+    return {
+        "now_playing": now_playing.to_dict() if now_playing is not None else None,
+        "repeat": player.is_repeat(),
+        "playlist": _songs_to_dicts(player.playlist()),
+        "up_next": _songs_to_dicts(player.up_next()),
+        "history": _songs_to_dicts(player.history()),
+    }
+
+
 def create_app():
     app = Flask(__name__)
 
@@ -93,5 +106,78 @@ def create_app():
         # passa pelo player para respeitar a regra de "musica em uso"
         song = player.remove_from_library(title, artist)
         return jsonify(song.to_dict())
+
+    # ---------- playlist ----------
+
+    @app.route("/api/playlist", methods=["GET"])
+    def get_playlist():
+        return jsonify(_songs_to_dicts(player.playlist()))
+
+    @app.route("/api/playlist", methods=["POST"])
+    def add_to_playlist():
+        data = _read_json()
+        title = _require_text(data, "title")
+        artist = _require_text(data, "artist")
+
+        song = player.add_to_playlist(title, artist)
+        return jsonify(song.to_dict()), 201
+
+    @app.route("/api/playlist", methods=["DELETE"])
+    def remove_from_playlist():
+        title = _require_text(request.args, "title")
+        artist = _require_text(request.args, "artist")
+
+        song = player.remove_from_playlist(title, artist)
+        return jsonify(song.to_dict())
+
+    # ---------- fila "tocar a seguir" ----------
+
+    @app.route("/api/queue", methods=["GET"])
+    def get_queue():
+        return jsonify(_songs_to_dicts(player.up_next()))
+
+    @app.route("/api/queue", methods=["POST"])
+    def enqueue():
+        data = _read_json()
+        title = _require_text(data, "title")
+        artist = _require_text(data, "artist")
+
+        song = player.enqueue(title, artist)
+        return jsonify(song.to_dict()), 201
+
+    # ---------- controles do player ----------
+    # todas as rotas daqui devolvem o estado completo
+
+    @app.route("/api/player", methods=["GET"])
+    def get_player():
+        return jsonify(_player_state(player))
+
+    @app.route("/api/player/play", methods=["POST"])
+    def play():
+        player.play()
+        return jsonify(_player_state(player))
+
+    @app.route("/api/player/next", methods=["POST"])
+    def next_song():
+        player.next_song()
+        return jsonify(_player_state(player))
+
+    @app.route("/api/player/previous", methods=["POST"])
+    def previous_song():
+        # sem historico o servico levanta IndexError -> 400
+        player.previous_song()
+        return jsonify(_player_state(player))
+
+    @app.route("/api/player/repeat", methods=["PUT"])
+    def set_repeat():
+        data = _read_json()
+        enabled = data.get("enabled")
+
+        # so aceita true/false de verdade (nao "sim", 1, etc.)
+        if not isinstance(enabled, bool):
+            raise ValueError("O campo 'enabled' deve ser true ou false.")
+
+        player.set_repeat(enabled)
+        return jsonify(_player_state(player))
 
     return app
