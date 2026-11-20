@@ -43,7 +43,7 @@ class Queue:
 
         while node is not None:
             if node.value == value:
-                if preivous is None:
+                if previous is None:
                     self._front = node.next
                 else:
                     previous.next = node.next
