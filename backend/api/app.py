@@ -43,6 +43,7 @@ def _player_state(player):
         "now_playing": now_playing.to_dict() if now_playing is not None else None,
         "repeat": player.is_repeat(),
         "playlist": _songs_to_dicts(player.playlist()),
+        "playlist_position": player.playlist_position(),
         "up_next": _songs_to_dicts(player.up_next()),
         "history": _songs_to_dicts(player.history()),
     }
@@ -171,6 +172,14 @@ def create_app(load_seed=True):
 
         song = player.enqueue(title, artist)
         return jsonify(song.to_dict()), 201
+
+    @app.route("/api/queue", methods=["DELETE"])
+    def remove_from_queue():
+        title = _require_text(request.args, "title")
+        artist = _require_text(request.args, "artist")
+
+        song = player.remove_from_queue(title, artist)
+        return jsonify(song.to_dict())
 
     # ---------- controles do player ----------
     # todas as rotas daqui devolvem o estado completo

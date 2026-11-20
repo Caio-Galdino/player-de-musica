@@ -106,7 +106,8 @@ function createSongItem(song, buttons) {
 }
 
 // buttonsFor(song) devolve os botoes de cada musica
-function renderList(listId, songs, buttonsFor, emptyText) {
+// activeIndex (opcional): posicao da musica tocando, que fica destacada
+function renderList(listId, songs, buttonsFor, emptyText, activeIndex) {
     const ul = document.getElementById(listId);
     ul.replaceChildren(); // apaga o que tinha antes
 
@@ -118,9 +119,13 @@ function renderList(listId, songs, buttonsFor, emptyText) {
         return;
     }
 
-    for (const song of songs) {
-        ul.appendChild(createSongItem(song, buttonsFor(song)));
-    }
+    songs.forEach((song, index) => {
+        const li = createSongItem(song, buttonsFor(song));
+        if (index === activeIndex) {
+            li.classList.add("playing");
+        }
+        ul.appendChild(li);
+    });
 }
 
 // ================= biblioteca =================
@@ -202,10 +207,20 @@ function renderPlayer(state) {
                 await loadPlayer();
             },
         },
-    ], "Playlist vazia.");
+    ], "Playlist vazia.", state.playlist_position);
 
-    // fila e historico so mostram as musicas, sem botoes
-    renderList("queue", state.up_next, () => [], "Nenhuma música na fila.");
+    renderList("queue", state.up_next, (song) => [
+        {
+            label: "Remover",
+            danger: true,
+            onClick: async () => {
+                await api("DELETE", "/queue" + songQuery(song));
+                await loadPlayer();
+            },
+        },
+    ], "Nenhuma música na fila.");
+
+    // historico so mostra as musicas, sem botoes
     renderList("history", state.history, () => [], "Nada tocou ainda.");
 }
 

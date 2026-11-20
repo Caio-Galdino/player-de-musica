@@ -36,6 +36,30 @@ class Queue:
 
         return self._front.value
 
+    def remove(self, value):
+        # tira a primeira ocorrencia do valor, esteja onde estiver na fila
+        previous = None
+        node = self._front
+
+        while node is not None:
+            if node.value == value:
+                if preivous is None:
+                    self._front = node.next
+                else:
+                    previous.next = node.next
+
+                # era o ultimo: o anterior vira o fim (ou None se a fila esvaziou)
+                if node is self._rear:
+                    self._rear = previous
+
+                self._size -= 1
+                return
+
+            previous = node
+            node = node.next
+
+        raise ValueError("Valor nao encontrado na fila")
+
     def is_empty(self):
         return self._front is None
 

@@ -207,6 +207,44 @@ class TestCircularLinkedList(unittest.TestCase):
         self.assertTrue(playlist.is_at_end())
         self.assertEqual(playlist.next(), 1)
 
+    def test_current_index_on_empty_list_raises(self):
+        playlist = CircularLinkedList()
+        with self.assertRaises(IndexError):
+            playlist.current_index()
+
+    def test_current_index_follows_navigation_and_wraps(self):
+        playlist = CircularLinkedList()
+        for value in ("A", "B", "C"):
+            playlist.append(value)
+
+        self.assertEqual(playlist.current_index(), 0)
+        playlist.next()
+        self.assertEqual(playlist.current_index(), 1)
+        playlist.next()
+        self.assertEqual(playlist.current_index(), 2)
+        playlist.next()  # volta para o inicio
+        self.assertEqual(playlist.current_index(), 0)
+        playlist.prev()  # volta para o fim
+        self.assertEqual(playlist.current_index(), 2)
+
+    def test_current_index_with_duplicate_values(self):
+        playlist = CircularLinkedList()
+        for value in ("A", "B", "A"):
+            playlist.append(value)
+
+        playlist.prev()  # segundo "A", no fim
+        self.assertEqual(playlist.current_index(), 2)
+
+    def test_current_index_after_removing_head(self):
+        playlist = CircularLinkedList()
+        for value in ("A", "B", "C"):
+            playlist.append(value)
+
+        playlist.next()  # atual = B
+        playlist.remove("A")
+        self.assertEqual(playlist.current(), "B")
+        self.assertEqual(playlist.current_index(), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

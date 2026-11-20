@@ -64,6 +64,16 @@ class PlayerService:
         self._up_next.enqueue(song)
         return song
 
+    def remove_from_queue(self, title, artist):
+        song = self._library.find(title, artist)
+
+        if not self._contains(self._up_next, song):
+            raise KeyError("A musica nao esta na fila")
+
+        # se ela estiver repetida na fila, sai so a primeira
+        self._up_next.remove(song)
+        return song
+
     def remove_from_library(self, title, artist):
         song = self._library.find(title, artist)
 
@@ -131,6 +141,16 @@ class PlayerService:
 
     def now_playing(self):
         return self._now_playing
+
+    def playlist_position(self):
+        # posicao na playlist da musica tocando; None se ela nao veio da playlist
+        if not self._playlist_started or self._now_playing is None:
+            return None
+
+        if self._playlist.current() is not self._now_playing:
+            return None
+
+        return self._playlist.current_index()
 
     def playlist(self):
         return self._playlist.to_list()

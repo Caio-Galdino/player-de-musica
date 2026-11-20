@@ -91,6 +91,20 @@ class CircularLinkedList:
 
         return self._current is self._head.prev
 
+    def current_index(self):
+        if self.is_empty():
+            raise IndexError("A lista esta vazia")
+
+        # conta os passos do inicio ate o no atual
+        node = self._head
+        index = 0
+
+        while node is not self._current:
+            node = node.next
+            index += 1
+
+        return index
+
     def is_empty(self):
         return self._head is None
 

@@ -14,7 +14,8 @@ Projeto acadêmico da disciplina de **Estrutura de Dados**.
 - Buscar músicas pelo título (ignora maiúsculas/minúsculas e espaços extras).
 - Listar a biblioteca em ordem alfabética ou por duração.
 - Montar uma playlist, que pode repetir do início (modo repetir).
-- Adicionar músicas na fila "tocar a seguir", que tem prioridade sobre a playlist.
+- Adicionar músicas na fila "tocar a seguir", que tem prioridade sobre a playlist, e retirar músicas dela.
+- Destacar na playlist a música que está tocando.
 - Voltar para a música anterior usando o histórico.
 - Interface web (HTML + JavaScript) conectada ao backend Python por uma API REST.
 
@@ -45,7 +46,7 @@ Os comandos devem ser executados **na raiz do projeto**, porque o código usa im
 
 ### Músicas de exemplo
 
-Ao iniciar, o servidor carrega as músicas do arquivo `backend/data/seed.json` (uma lista de objetos `{"title", "artist", "duration"}`, com a duração em segundos). Os dados ficam em memória: o que for adicionado pela interface se perde quando o servidor é reiniciado.
+Ao iniciar, o servidor carrega as músicas do arquivo `backend/data/seed.json` (uma lista de objetos `{"title", "artist", "duration"}`, com a duração em segundos). O arquivo já vem com 10 músicas conhecidas, incluindo duas com o mesmo título ("Hallelujah", de Leonard Cohen e de Jeff Buckley) para demonstrar títulos repetidos na tabela hash e o desempate por artista na AVL. Os dados ficam em memória: o que for adicionado pela interface se perde quando o servidor é reiniciado.
 
 ### Testes
 
@@ -92,7 +93,7 @@ A mesma estrutura também é usada na biblioteca para guardar todas as músicas 
 
 Lista simplesmente encadeada com ponteiros para o início e o fim.
 
-**Por que nessa parte:** as músicas escolhidas para tocar a seguir devem sair **na ordem em que foram adicionadas**: a primeira a entrar é a primeira a tocar. A fila tem prioridade sobre a playlist: enquanto houver músicas nela, o player toca da fila sem mexer na posição da playlist. Inserir no fim e retirar do início são O(1).
+**Por que nessa parte:** as músicas escolhidas para tocar a seguir devem sair **na ordem em que foram adicionadas**: a primeira a entrar é a primeira a tocar. A fila tem prioridade sobre a playlist: enquanto houver músicas nela, o player toca da fila sem mexer na posição da playlist. Inserir no fim e retirar do início são O(1). Além das operações clássicas, a fila tem um `remove(valor)` para o usuário desistir de uma música antes de ela tocar; ele percorre a fila a partir do início (O(n) no pior caso) e não altera a ordem das demais.
 
 ### Pilha (LIFO): histórico
 
@@ -149,6 +150,7 @@ Uma mesma música (o mesmo objeto `Song`) é compartilhada por todas as estrutur
 | `remove_current` | O(1) | O(1) |
 | `next` / `prev` / `current` | O(1) | O(1) |
 | `is_at_end` | O(1) | O(1) |
+| `current_index` | O(1): atual no início | O(n): atual no fim |
 | `to_list` | O(n) | O(n) |
 
 ### Fila
@@ -158,6 +160,7 @@ Uma mesma música (o mesmo objeto `Song`) é compartilhada por todas as estrutur
 | `enqueue` | O(1) | O(1) |
 | `dequeue` | O(1) | O(1) |
 | `peek` | O(1) | O(1) |
+| `remove(valor)` | O(1): valor no início | O(n): valor no fim ou ausente |
 | `to_list` | O(n) | O(n) |
 
 ### Pilha
@@ -210,13 +213,14 @@ Toda a comunicação entre a interface e o backend é feita em JSON. Em caso de 
 | DELETE | `/api/playlist?title=...&artist=...` | remove da playlist |
 | GET | `/api/queue` | lista a fila "tocar a seguir" |
 | POST | `/api/queue` | adiciona `{title, artist}` à fila |
+| DELETE | `/api/queue?title=...&artist=...` | remove da fila |
 | GET | `/api/player` | estado completo do player |
 | POST | `/api/player/play` | começa a tocar |
 | POST | `/api/player/next` | próxima música |
 | POST | `/api/player/previous` | música anterior (histórico) |
 | PUT | `/api/player/repeat` | liga/desliga o repetir `{enabled: true\|false}` |
 
-As rotas de `/api/player` devolvem sempre o estado completo (`now_playing`, `repeat`, `playlist`, `up_next`, `history`), para a interface se redesenhar com uma única chamada.
+As rotas de `/api/player` devolvem sempre o estado completo (`now_playing`, `repeat`, `playlist`, `playlist_position`, `up_next`, `history`), para a interface se redesenhar com uma única chamada. `playlist_position` é a posição na playlist da música que está tocando (ou `null` se ela veio da fila), usada para destacá-la.
 
 ## Divisão de tarefas
 

@@ -237,6 +237,20 @@ input::placeholder {
     border-top: 1px solid var(--border);
 }
 
+/* musica da playlist que esta tocando agora */
+.song.playing {
+    background: rgba(29, 185, 120, 0.12);
+}
+
+.song.playing .song-title {
+    color: var(--accent);
+}
+
+.song.playing .song-cover {
+    background: var(--accent);
+    color: #04140c;
+}
+
 .song-cover {
     display: grid;
     flex-shrink: 0;

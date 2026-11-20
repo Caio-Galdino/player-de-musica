@@ -321,6 +321,7 @@ class TestPlayerRoutes(PlayerApiTestCase):
                 "now_playing": None,
                 "repeat": False,
                 "playlist": [],
+                "playlist_position": None,
                 "up_next": [],
                 "history": [],
             },
@@ -491,6 +492,56 @@ class TestSeed(unittest.TestCase):
 
         # funciona com o seed vazio ou cheio: carrega tudo que esta no arquivo
         self.assertEqual(len(songs), len(seed))
+
+
+class TestRemoveFromQueueRoute(PlayerApiTestCase):
+    def test_remove_from_queue(self):
+        self.enqueue("Help", "The Beatles")
+        self.enqueue("Imagine", "John Lennon")
+
+        response = self.client.delete(
+            "/api/queue", query_string=self.song_ref("help", "the beatles")
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["title"], "Help")
+        self.assertEqual(
+            self.titles(self.client.get("/api/queue").get_json()), ["Imagine"]
+        )
+
+    def test_remove_song_not_in_queue_returns_404(self):
+        response = self.client.delete(
+            "/api/queue", query_string=self.song_ref("Help", "The Beatles")
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.get_json(), {"error": "A musica nao esta na fila"})
+
+    def test_remove_from_queue_without_artist_returns_400(self):
+        response = self.client.delete("/api/queue", query_string={"title": "Help"})
+
+        self.assertEqual(response.status_code, 400)
+
+
+class TestPlaylistPosition(PlayerApiTestCase):
+    def test_state_has_playlist_position(self):
+        self.add_to_playlist("Help", "The Beatles")
+        self.add_to_playlist("Imagine", "John Lennon")
+
+        state = self.client.post("/api/player/play").get_json()
+        self.assertEqual(state["playlist_position"], 0)
+
+        state = self.client.post("/api/player/next").get_json()
+        self.assertEqual(state["playlist_position"], 1)
+
+    def test_playlist_position_null_while_playing_from_queue(self):
+        self.add_to_playlist("Help", "The Beatles")
+        self.enqueue("Imagine", "John Lennon")
+
+        state = self.client.post("/api/player/play").get_json()
+
+        self.assertEqual(self.now_playing_title(state), "Imagine")
+        self.assertIsNone(state["playlist_position"])
 
 
 if __name__ == "__main__":

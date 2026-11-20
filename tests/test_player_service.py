@@ -311,6 +311,111 @@ class TestPlayerService(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.player.remove_from_library("Z", "X")
 
+    # ---------- remover da fila ----------
+
+    # tira a musica da fila mantendo a ordem das outras
+    def test_remove_from_queue(self):
+        for title in ("A", "B", "C"):
+            self.player.enqueue(title, "X")
+        song = self.player.remove_from_queue("b", "x")
+        self.assertEqual(song.title, "B")
+        self.assertEqual(self.titles(self.player.up_next()), ["A", "C"])
+
+    # musica repetida na fila: sai so a primeira
+    def test_remove_from_queue_duplicate_removes_one(self):
+        self.player.enqueue("A", "X")
+        self.player.enqueue("B", "X")
+        self.player.enqueue("A", "X")
+        self.player.remove_from_queue("A", "X")
+        self.assertEqual(self.titles(self.player.up_next()), ["B", "A"])
+
+    # musica da biblioteca que nao esta na fila levanta KeyError
+    def test_remove_from_queue_not_in_queue_raises(self):
+        self.player.enqueue("A", "X")
+        with self.assertRaises(KeyError):
+            self.player.remove_from_queue("B", "X")
+        self.assertEqual(self.titles(self.player.up_next()), ["A"])
+
+    # musica que nem existe na biblioteca levanta KeyError
+    def test_remove_from_queue_missing_song_raises(self):
+        with self.assertRaises(KeyError):
+            self.player.remove_from_queue("Z", "X")
+
+    # depois de sair da fila, a musica pode ser removida da biblioteca
+    def test_song_removed_from_queue_can_leave_library(self):
+        self.player.enqueue("A", "X")
+        self.player.remove_from_queue("A", "X")
+        self.player.remove_from_library("A", "X")
+        with self.assertRaises(KeyError):
+            self.library.find("A", "X")
+
+    # a musica tirada da fila nao toca mais
+    def test_removed_song_is_not_played(self):
+        self.add_playlist(["C"])
+        self.player.enqueue("A", "X")
+        self.player.enqueue("B", "X")
+        self.player.remove_from_queue("A", "X")
+        self.assertEqual(self.next_titles(2), ["B", "C"])
+
+    # ---------- posicao na playlist ----------
+
+    # nada tocando: sem posicao
+    def test_playlist_position_none_when_nothing_playing(self):
+        self.add_playlist(["A", "B"])
+        self.assertIsNone(self.player.playlist_position())
+
+    # acompanha a musica atual da playlist
+    def test_playlist_position_follows_playlist(self):
+        self.add_playlist(["A", "B", "C"])
+        self.player.play()
+        self.assertEqual(self.player.playlist_position(), 0)
+        self.player.next_song()
+        self.assertEqual(self.player.playlist_position(), 1)
+        self.player.next_song()
+        self.assertEqual(self.player.playlist_position(), 2)
+
+    # musica da fila tocando nao marca nada na playlist
+    def test_playlist_position_none_while_playing_from_queue(self):
+        self.add_playlist(["A", "B"])
+        self.player.play()
+        self.player.enqueue("C", "X")
+        self.player.next_song()
+        self.assertEqual(self.title(self.player.now_playing()), "C")
+        self.assertIsNone(self.player.playlist_position())
+        self.player.next_song()  # volta para a playlist
+        self.assertEqual(self.player.playlist_position(), 1)
+
+    # musica repetida na playlist: marca a posicao certa, nao a primeira
+    def test_playlist_position_with_duplicates(self):
+        self.add_playlist(["A", "B", "A"])
+        self.player.play()
+        self.next_titles(2)
+        self.assertEqual(self.title(self.player.now_playing()), "A")
+        self.assertEqual(self.player.playlist_position(), 2)
+
+    # fim da playlist sem repeat: parou, sem posicao
+    def test_playlist_position_none_after_playlist_ends(self):
+        self.add_playlist(["A", "B"])
+        self.player.play()
+        self.next_titles(2)
+        self.assertIsNone(self.player.now_playing())
+        self.assertIsNone(self.player.playlist_position())
+
+    # com repeat, volta para a posicao 0
+    def test_playlist_position_wraps_with_repeat(self):
+        self.add_playlist(["A", "B"])
+        self.player.set_repeat(True)
+        self.player.play()
+        self.next_titles(2)
+        self.assertEqual(self.player.playlist_position(), 0)
+
+    # remover a musica atual da playlist: a proxima ainda nao tocou, sem posicao
+    def test_playlist_position_none_after_removing_current(self):
+        self.add_playlist(["A", "B"])
+        self.player.play()
+        self.player.remove_from_playlist("A", "X")
+        self.assertIsNone(self.player.playlist_position())
+
 
 if __name__ == "__main__":
     unittest.main()

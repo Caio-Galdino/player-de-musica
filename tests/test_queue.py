@@ -115,6 +115,73 @@ class TestQueue(unittest.TestCase):
         q = Queue()
         self.assertEqual(q.to_list(), [])
 
+    # ---------- remove ----------
+
+    # remove do inicio: o proximo vira o primeiro
+    def test_remove_front(self):
+        q = Queue()
+        for value in (1, 2, 3):
+            q.enqueue(value)
+        q.remove(1)
+        self.assertEqual(q.to_list(), [2, 3])
+        self.assertEqual(q.peek(), 2)
+        self.assertEqual(q.size(), 2)
+
+    # remove do meio mantem a ordem do resto
+    def test_remove_middle(self):
+        q = Queue()
+        for value in (1, 2, 3):
+            q.enqueue(value)
+        q.remove(2)
+        self.assertEqual(q.to_list(), [1, 3])
+        self.assertEqual(q.size(), 2)
+
+    # remove do fim: o enqueue seguinte precisa ir para o lugar certo
+    def test_remove_rear_then_enqueue(self):
+        q = Queue()
+        for value in (1, 2, 3):
+            q.enqueue(value)
+        q.remove(3)
+        q.enqueue(4)
+        self.assertEqual(q.to_list(), [1, 2, 4])
+        self.assertEqual(q.size(), 3)
+
+    # remover o unico elemento esvazia a fila e ela continua utilizavel
+    def test_remove_only_element_then_reuse(self):
+        q = Queue()
+        q.enqueue(1)
+        q.remove(1)
+        self.assertTrue(q.is_empty())
+        self.assertEqual(q.size(), 0)
+        q.enqueue(2)
+        self.assertEqual(q.to_list(), [2])
+        self.assertEqual(q.dequeue(), 2)
+        self.assertTrue(q.is_empty())
+
+    # com valores repetidos, sai so a primeira ocorrencia
+    def test_remove_only_first_occurrence(self):
+        q = Queue()
+        for value in (1, 2, 1, 3):
+            q.enqueue(value)
+        q.remove(1)
+        self.assertEqual(q.to_list(), [2, 1, 3])
+
+    # valor que nao esta na fila levanta ValueError sem mudar nada
+    def test_remove_missing_raises_and_keeps_queue(self):
+        q = Queue()
+        q.enqueue(1)
+        q.enqueue(2)
+        with self.assertRaises(ValueError):
+            q.remove(9)
+        self.assertEqual(q.to_list(), [1, 2])
+        self.assertEqual(q.size(), 2)
+
+    # remover de fila vazia levanta ValueError
+    def test_remove_on_empty_queue_raises(self):
+        q = Queue()
+        with self.assertRaises(ValueError):
+            q.remove(1)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,1 +1,12 @@
-[]
+[
+    {"title": "Bohemian Rhapsody", "artist": "Queen", "duration": 355},
+    {"title": "Imagine", "artist": "John Lennon", "duration": 183},
+    {"title": "Billie Jean", "artist": "Michael Jackson", "duration": 294},
+    {"title": "Hey Jude", "artist": "The Beatles", "duration": 431},
+    {"title": "Yesterday", "artist": "The Beatles", "duration": 125},
+    {"title": "Smells Like Teen Spirit", "artist": "Nirvana", "duration": 301},
+    {"title": "Hotel California", "artist": "Eagles", "duration": 390},
+    {"title": "Garota de Ipanema", "artist": "Stan Getz & João Gilberto", "duration": 324},
+    {"title": "Hallelujah", "artist": "Leonard Cohen", "duration": 279},
+    {"title": "Hallelujah", "artist": "Jeff Buckley", "duration": 413}
+]
