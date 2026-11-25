@@ -275,5 +275,5 @@ Projeto desenvolvido individualmente: todas as etapas foram realizadas por **Cai
 | Estruturas: tabela hash e árvore AVL | Caio Henrique Brito Galdino |
 | Serviços da biblioteca e do player | Caio Henrique Brito Galdino |
 | API REST (Flask) | Caio Henrique Brito Galdino |
-| Interface web (HTML, CSS e JavaScript) | Caio Henrique Brito Galdino |
+| Interface web (HTML, CSS e JavaScript) | Caio Henrique Brito Galdino, com auxílio de IA (Claude) |
 | Testes automatizados | Caio Henrique Brito Galdino |
