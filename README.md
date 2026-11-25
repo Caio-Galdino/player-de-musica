@@ -54,7 +54,7 @@ Ao iniciar, o servidor carrega as músicas do arquivo `backend/data/seed.json` (
 python -m unittest discover -s tests
 ```
 
-Há testes para cada estrutura, para os serviços e para todas as rotas da API.
+Há testes para cada estrutura, para os serviços, para todas as rotas da API e para o teste de carga.
 
 ## Organização do projeto
 
@@ -67,6 +67,7 @@ backend/
 └── data/         # músicas de exemplo (seed.json)
 frontend/         # interface web: index.html, style.css, app.js
 tests/            # testes automatizados (unittest)
+load_test.py      # teste de carga (altura da AVL, hash e tempos)
 ```
 
 O sistema é dividido em camadas: o **frontend** só conversa com a **API**; a API só traduz HTTP/JSON para chamadas aos **serviços**; os serviços aplicam as regras usando as **estruturas**.
@@ -197,6 +198,46 @@ Uma mesma música (o mesmo objeto `Song`) é compartilhada por todas as estrutur
 | `to_list` (percurso em ordem) | O(n) | O(n) |
 
 Como a árvore é sempre balanceada, sua altura é no máximo ~1,44·log₂(n), por isso não existe o pior caso O(n) de uma árvore binária de busca comum. Cada rotação é O(1), e no máximo O(log n) nós são rebalanceados por operação.
+
+## Teste de carga
+
+O script `load_test.py` insere 1.000, 5.000 e 10.000 músicas na biblioteca, pelo `LibraryService`, e mede a altura das árvores AVL, a ocupação da tabela hash e os tempos de inserção e busca. Para executar, na raiz do projeto (não é preciso subir o servidor):
+
+```bash
+python load_test.py
+```
+
+Os títulos são inseridos **em ordem crescente**, o pior caso de uma árvore binária de busca (BST) comum. As durações são espalhadas entre 60 e 599 segundos. Ao final de cada inserção, o script confere a quantidade de músicas e se a listagem por título está ordenada.
+
+### Resultados
+
+**Árvore AVL**
+
+| Músicas | Altura (título) | Altura (duração) | Altura mínima ⌊log₂ n⌋ | Limite da AVL 1,44·log₂ n | BST comum (título) |
+|---|---|---|---|---|---|
+| 1.000 | 9 | 10 | 9 | 14,4 | 999 |
+| 5.000 | 12 | 13 | 12 | 17,7 | 4.999 |
+| 10.000 | 13 | 14 | 13 | 19,1 | 9.999 |
+
+A altura é contada em arestas. A coluna da BST comum é calculada (n − 1), não medida.
+
+**Tabela hash e tempos**
+
+| Músicas | Capacidade da hash | Fator de carga | Tempo de inserção | Tempo médio de busca |
+|---|---|---|---|---|
+| 1.000 | 2.048 | 0,49 | 0,012 s | 1,78 µs |
+| 5.000 | 8.192 | 0,61 | 0,066 s | 1,84 µs |
+| 10.000 | 16.384 | 0,61 | 0,143 s | 1,93 µs |
+
+Os tempos são a mediana de 10 execuções e variam conforme a máquina e os outros programas em uso; as alturas e a capacidade da hash são sempre as mesmas.
+
+### Comentários
+
+- **A altura cresce de forma logarítmica:** com 10 vezes mais músicas, a árvore por título passou de altura 9 para 13. Em uma BST comum, a inserção em ordem formaria uma lista, e a altura passaria de 999 para 9.999.
+- **As duas árvores ficam bem abaixo do limite teórico.** A árvore por título atinge a altura mínima: a inserção em ordem crescente provoca rotações à esquerda que a mantêm compacta. A árvore por duração, que recebe as chaves fora de ordem, fica apenas um nível acima.
+- **O rehash mantém a hash eficiente:** a tabela começa com 8 baldes e dobra sempre que o fator de carga passa de 0,75. Com 10.000 títulos, chegou a 16.384 baldes.
+- **O tempo de busca quase não muda** (de 1,78 para 1,93 µs com 10 vezes mais músicas), o que condiz com o custo O(1) médio da hash.
+- **O tempo de inserção cresceu cerca de 12 vezes** para 10 vezes mais músicas, o que condiz com O(n log n), que prevê cerca de 13 vezes: cada música é inserida em duas árvores AVL, a O(log n) por inserção, e na hash, a O(1) amortizado.
 
 ## API
 
