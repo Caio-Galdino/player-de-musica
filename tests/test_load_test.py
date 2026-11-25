@@ -79,6 +79,8 @@ class TestLoadTest(unittest.TestCase):
         self.assertRegex(text, r"Altura AVL \(titulo\): +9\n")
         self.assertRegex(text, r"Altura AVL \(duracao\): +10\n")
         self.assertRegex(text, r"Capacidade da hash: +2048\n")
+        self.assertRegex(text, r"Colisoes na hash: +384\n")
+        self.assertRegex(text, r"Maior corrente da hash: +3\n")
 
 
 if __name__ == "__main__":

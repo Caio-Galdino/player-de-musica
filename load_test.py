@@ -61,6 +61,8 @@ def run(total):
     print(f"Altura BST comum (titulo): {total - 1}")
     print(f"Capacidade da hash:        {capacity}")
     print(f"Fator de carga da hash:    {total / capacity:.2f}")
+    print(f"Colisoes na hash:          {library.hash_collisions()}")
+    print(f"Maior corrente da hash:    {library.hash_longest_chain()}")
     print()
 
 if __name__ == "__main__":

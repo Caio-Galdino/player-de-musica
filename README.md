@@ -223,19 +223,20 @@ A altura é contada em arestas. A coluna da BST comum é calculada (n − 1), n�
 
 **Tabela hash e tempos**
 
-| Músicas | Capacidade da hash | Fator de carga | Tempo de inserção | Tempo médio de busca |
-|---|---|---|---|---|
-| 1.000 | 2.048 | 0,49 | 0,012 s | 1,78 µs |
-| 5.000 | 8.192 | 0,61 | 0,066 s | 1,84 µs |
-| 10.000 | 16.384 | 0,61 | 0,143 s | 1,93 µs |
+| Músicas | Capacidade da hash | Fator de carga | Colisões | Maior corrente | Tempo de inserção | Tempo médio de busca |
+|---|---|---|---|---|---|---|
+| 1.000 | 2.048 | 0,49 | 384 | 3 | 0,012 s | 1,78 µs |
+| 5.000 | 8.192 | 0,61 | 2.070 | 4 | 0,066 s | 1,84 µs |
+| 10.000 | 16.384 | 0,61 | 4.009 | 4 | 0,143 s | 1,93 µs |
 
-Os tempos são a mediana de 10 execuções e variam conforme a máquina e os outros programas em uso; as alturas e a capacidade da hash são sempre as mesmas.
+É contada como colisão toda chave além da primeira em um mesmo balde. Os tempos são a mediana de 10 execuções e variam conforme a máquina e os outros programas em uso; as alturas e os demais números da hash são sempre os mesmos.
 
 ### Comentários
 
 - **A altura cresce de forma logarítmica:** com 10 vezes mais músicas, a árvore por título passou de altura 9 para 13. Em uma BST comum, a inserção em ordem formaria uma lista, e a altura passaria de 999 para 9.999.
 - **As duas árvores ficam bem abaixo do limite teórico.** A árvore por título atinge a altura mínima: a inserção em ordem crescente provoca rotações à esquerda que a mantêm compacta. A árvore por duração, que recebe as chaves fora de ordem, fica apenas um nível acima.
 - **O rehash mantém a hash eficiente:** a tabela começa com 8 baldes e dobra sempre que o fator de carga passa de 0,75. Com 10.000 títulos, chegou a 16.384 baldes.
+- **As colisões não pesam na busca:** mesmo com 4.009 colisões em 10.000 títulos, elas ficam espalhadas pelos baldes, e a maior corrente tem só 4 elementos.
 - **O tempo de busca quase não muda** (de 1,78 para 1,93 µs com 10 vezes mais músicas), o que condiz com o custo O(1) médio da hash.
 - **O tempo de inserção cresceu cerca de 12 vezes** para 10 vezes mais músicas, o que condiz com O(n log n), que prevê cerca de 13 vezes: cada música é inserida em duas árvores AVL, a O(log n) por inserção, e na hash, a O(1) amortizado.
 

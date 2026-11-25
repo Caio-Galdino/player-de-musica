@@ -192,5 +192,54 @@ class TestHashTable(unittest.TestCase):
         self.assertEqual(t.capacity(), 16)
 
 
+    # --- colisoes e maior corrente ---
+
+    # tabela vazia nao tem colisoes nem correntes
+    def test_collisions_of_empty_table(self):
+        t = HashTable()
+        self.assertEqual(t.collisions(), 0)
+        self.assertEqual(t.longest_chain(), 0)
+
+    # "a", "b" e "c" caem em baldes diferentes
+    def test_no_collisions(self):
+        t = HashTable(capacity=8)
+        for key in ("a", "b", "c"):
+            t.put(key, 1)
+        self.assertEqual(t.collisions(), 0)
+        self.assertEqual(t.longest_chain(), 1)
+
+    # "a" (97), "i" (105) e "q" (113) deixam o mesmo resto na divisao por 8
+    def test_collisions_in_same_bucket(self):
+        t = HashTable(capacity=8)
+        for key in ("a", "i", "q"):
+            t.put(key, 1)
+        self.assertEqual(t.collisions(), 2)
+        self.assertEqual(t.longest_chain(), 3)
+
+    # duas correntes: as colisoes somam, a maior corrente nao
+    def test_collisions_in_two_buckets(self):
+        t = HashTable(capacity=8)
+        for key in ("a", "i", "q", "b", "j"):
+            t.put(key, 1)
+        self.assertEqual(t.collisions(), 3)
+        self.assertEqual(t.longest_chain(), 3)
+
+    # substituir valor nao conta como colisao
+    def test_replacing_is_not_a_collision(self):
+        t = HashTable(capacity=8)
+        t.put("a", 1)
+        t.put("a", 2)
+        self.assertEqual(t.collisions(), 0)
+
+    # remover uma chave da corrente diminui as colisoes
+    def test_collisions_after_remove(self):
+        t = HashTable(capacity=8)
+        for key in ("a", "i", "q"):
+            t.put(key, 1)
+        t.remove("i")
+        self.assertEqual(t.collisions(), 1)
+        self.assertEqual(t.longest_chain(), 2)
+
+
 if __name__ == "__main__":
     unittest.main()

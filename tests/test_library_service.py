@@ -277,5 +277,28 @@ class TestLibraryService(unittest.TestCase):
         self.assertEqual(library.hash_capacity(), 8)
 
 
+    # biblioteca vazia nao tem colisoes
+    def test_hash_collisions_of_empty_library(self):
+        library = LibraryService()
+        self.assertEqual(library.hash_collisions(), 0)
+        self.assertEqual(library.hash_longest_chain(), 0)
+
+    # "a", "i" e "q" caem no mesmo balde quando a hash tem 8 baldes
+    def test_hash_collisions_of_library(self):
+        library = LibraryService()
+        for title in ("A", "I", "Q"):
+            library.add_song(title, "Artista", 100)
+        self.assertEqual(library.hash_collisions(), 2)
+        self.assertEqual(library.hash_longest_chain(), 3)
+
+    # titulos repetidos ficam na mesma chave: nao sao colisoes
+    def test_repeated_titles_are_not_collisions(self):
+        library = LibraryService()
+        for i in range(20):
+            library.add_song("Hallelujah", f"Artista {i}", 100)
+        self.assertEqual(library.hash_collisions(), 0)
+        self.assertEqual(library.hash_longest_chain(), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

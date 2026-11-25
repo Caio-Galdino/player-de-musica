@@ -83,6 +83,37 @@ class HashTable:
     def capacity(self):
         return self._capacity
 
+    def collisions(self):
+        # em cada balde, toda chave alem da primeira e uma colisao
+        total = 0
+
+        for bucket in self._buckets:
+            if bucket is not None:
+                node = bucket.next
+
+                while node is not None:
+                    total += 1
+                    node = node.next
+
+        return total
+
+    def longest_chain(self):
+        # tamanho da maior corrente: pior caso real de uma busca
+        longest = 0
+
+        for bucket in self._buckets:
+            length = 0
+            node = bucket
+
+            while node is not None:
+                length += 1
+                node = node.next
+
+            if length > longest:
+                longest = length
+
+        return longest
+
     def is_empty(self):
         return self._size == 0
     

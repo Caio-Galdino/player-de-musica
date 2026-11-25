@@ -109,3 +109,9 @@ class LibraryService:
 
     def hash_capacity(self):
         return self._by_title.capacity()
+
+    def hash_collisions(self):
+        return self._by_title.collisions()
+
+    def hash_longest_chain(self):
+        return self._by_title.longest_chain()
