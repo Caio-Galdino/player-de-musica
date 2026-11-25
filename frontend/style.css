@@ -1,14 +1,14 @@
-/* ================= cores e medidas (tema escuro) ================= */
+/* ================= cores e medidas (tema escuro, paleta do Claude) ================= */
 :root {
-    --bg: #0f1115;
-    --surface: #181b22;
-    --surface-2: #20242d;
-    --border: #2a2f3a;
-    --text: #e8eaf0;
-    --muted: #8b92a3;
-    --accent: #1db978;
-    --accent-hover: #22d389;
-    --danger: #e5484d;
+    --bg: #1f1e1d;
+    --surface: #262624;
+    --surface-2: #30302e;
+    --border: #45443f;
+    --text: #faf9f5;
+    --muted: #b0aea5;
+    --accent: #d97757;
+    --accent-hover: #e58b6d;
+    --danger: #ff6f73;
     --radius: 12px;
 }
 
@@ -50,7 +50,7 @@ h2 {
     height: 40px;
     border-radius: 10px;
     background: var(--accent);
-    color: #04140c;
+    color: #1f1e1d;
     font-size: 22px;
     font-weight: bold;
 }
@@ -190,7 +190,7 @@ input::placeholder {
 .btn-primary {
     border-color: var(--accent);
     background: var(--accent);
-    color: #04140c;
+    color: #1f1e1d;
 }
 
 .btn-primary:hover {
@@ -239,16 +239,16 @@ input::placeholder {
 
 /* musica da playlist que esta tocando agora */
 .song.playing {
-    background: rgba(29, 185, 120, 0.12);
+    background: rgba(217, 119, 87, 0.14);
 }
 
 .song.playing .song-title {
-    color: var(--accent);
+    color: var(--accent-hover);
 }
 
 .song.playing .song-cover {
     background: var(--accent);
-    color: #04140c;
+    color: #1f1e1d;
 }
 
 .song-cover {
@@ -311,7 +311,7 @@ input::placeholder {
     flex-direction: column;
     align-items: center;
     gap: 16px;
-    background: linear-gradient(160deg, #1c3a2d 0%, var(--surface) 60%);
+    background: linear-gradient(160deg, #4a2f25 0%, var(--surface) 60%);
     text-align: center;
 }
 
@@ -321,8 +321,8 @@ input::placeholder {
     width: 140px;
     height: 140px;
     border-radius: var(--radius);
-    background: linear-gradient(135deg, var(--accent), #0e6b45);
-    color: #04140c;
+    background: linear-gradient(135deg, var(--accent), #a84f32);
+    color: #1f1e1d;
     font-size: 56px;
     font-weight: 800;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
@@ -390,7 +390,7 @@ input::placeholder {
     width: 60px;
     height: 60px;
     background: var(--accent);
-    color: #04140c;
+    color: #1f1e1d;
 }
 
 .round-big:hover {
