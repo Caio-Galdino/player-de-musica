@@ -216,5 +216,66 @@ class TestLibraryService(unittest.TestCase):
         self.assertEqual(library.list_by_duration(), [])
 
 
+    # --- altura das arvores e capacidade da hash ---
+
+    # biblioteca vazia: altura -1 (convencao por arestas) e hash com 8 baldes
+    def test_heights_and_capacity_of_empty_library(self):
+        library = LibraryService()
+        self.assertEqual(library.title_tree_height(), -1)
+        self.assertEqual(library.duration_tree_height(), -1)
+        self.assertEqual(library.hash_capacity(), 8)
+
+    # com uma musica, a raiz e folha: altura 0
+    def test_heights_with_one_song(self):
+        library = LibraryService()
+        library.add_song("Imagine", "John Lennon", 183)
+        self.assertEqual(library.title_tree_height(), 0)
+        self.assertEqual(library.duration_tree_height(), 0)
+
+    # 7 titulos e duracoes em ordem crescente formam arvores perfeitas de altura 2
+    # (em uma BST comum a altura seria 6)
+    def test_heights_stay_balanced_with_sorted_songs(self):
+        library = LibraryService()
+        for i in range(7):
+            library.add_song(f"Musica {i}", "Artista", 100 + i)
+        self.assertEqual(library.title_tree_height(), 2)
+        self.assertEqual(library.duration_tree_height(), 2)
+
+    # cada metodo le a sua arvore: os titulos entram em ordem (altura 2), mas as
+    # duracoes entram em uma ordem que deixa a outra arvore com altura 3
+    def test_heights_come_from_the_right_tree(self):
+        library = LibraryService()
+        durations = (101, 102, 103, 105, 106, 104, 107)
+        for i in range(len(durations)):
+            library.add_song(f"Musica {i}", "Artista", durations[i])
+        self.assertEqual(library.title_tree_height(), 2)
+        self.assertEqual(library.duration_tree_height(), 3)
+
+    # remover todas as musicas volta as alturas para -1
+    def test_heights_after_removing_everything(self):
+        library = self.make_library()
+        for song in library.list_by_title():
+            library.remove_song(song.title, song.artist)
+        self.assertEqual(library.title_tree_height(), -1)
+        self.assertEqual(library.duration_tree_height(), -1)
+
+    # a 7a chave passa do fator de carga 0.75 e dobra a hash
+    def test_hash_capacity_grows_with_library(self):
+        library = LibraryService()
+        for i in range(6):
+            library.add_song(f"Musica {i}", "Artista", 100)
+        self.assertEqual(library.hash_capacity(), 8)
+        library.add_song("Musica 6", "Artista", 100)
+        self.assertEqual(library.hash_capacity(), 16)
+
+    # titulos repetidos usam a mesma chave, entao a hash nao cresce
+    def test_hash_capacity_ignores_repeated_titles(self):
+        library = LibraryService()
+        for i in range(20):
+            library.add_song("Hallelujah", f"Artista {i}", 100)
+        self.assertEqual(library.size(), 20)
+        self.assertEqual(library.hash_capacity(), 8)
+
+
 if __name__ == "__main__":
     unittest.main()

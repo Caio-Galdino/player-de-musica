@@ -100,3 +100,12 @@ class LibraryService:
 
     def is_empty(self):
         return self._size == 0
+
+    def title_tree_height(self):
+        return self._sorted_by_title.height()
+
+    def duration_tree_height(self):
+        return self._sorted_by_duration.height()
+
+    def hash_capacity(self):
+        return self._by_title.capacity()

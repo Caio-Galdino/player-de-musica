@@ -80,6 +80,9 @@ class HashTable:
     def size(self):
         return self._size
 
+    def capacity(self):
+        return self._capacity
+
     def is_empty(self):
         return self._size == 0
     

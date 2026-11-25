@@ -154,5 +154,43 @@ class TestHashTable(unittest.TestCase):
         self.assertLessEqual(t.size() / t._capacity, 0.75)
 
 
+    # --- capacity ---
+
+    # sem argumento, a tabela comeca com 8 baldes
+    def test_default_capacity(self):
+        self.assertEqual(HashTable().capacity(), 8)
+
+    # capacity devolve a capacidade pedida na criacao
+    def test_custom_capacity(self):
+        self.assertEqual(HashTable(capacity=5).capacity(), 5)
+
+    # 6 / 8 = 0.75 ainda nao passa do limite; a 7a chave dispara o rehash
+    def test_capacity_doubles_only_after_limit(self):
+        t = HashTable(capacity=8)
+        for i in range(6):
+            t.put(f"song {i}", i)
+        self.assertEqual(t.capacity(), 8)
+        t.put("song 6", 6)
+        self.assertEqual(t.capacity(), 16)
+
+    # substituir o valor de uma chave nao aumenta a tabela
+    def test_capacity_unchanged_when_replacing(self):
+        t = HashTable(capacity=8)
+        for i in range(6):
+            t.put(f"song {i}", i)
+        for i in range(6):
+            t.put(f"song {i}", i * 10)
+        self.assertEqual(t.capacity(), 8)
+
+    # remover nao encolhe a tabela
+    def test_capacity_unchanged_after_remove(self):
+        t = HashTable(capacity=8)
+        for i in range(7):
+            t.put(f"song {i}", i)
+        for i in range(7):
+            t.remove(f"song {i}")
+        self.assertEqual(t.capacity(), 16)
+
+
 if __name__ == "__main__":
     unittest.main()
